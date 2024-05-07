@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 
 export const Auth = () => {
   return (
@@ -68,6 +69,7 @@ const Login = () => {
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(""); // Add email state
 
   const [_, setCookies] = useCookies(["access_token"]);
   const navigate = useNavigate();
@@ -78,6 +80,7 @@ const Register = () => {
       await axios.post("http://localhost:3001/auth/register", {
         username,
         password,
+        email, // Include email in the registration request
       });
       alert("Registration Completed! Now login.");
     } catch (error) {
@@ -105,6 +108,17 @@ const Register = () => {
             id="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          {" "}
+          {/* Add email input field */}
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
         </div>
         <button type="submit">Register</button>

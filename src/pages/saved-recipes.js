@@ -1,112 +1,98 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useCookies } from "react-cookie";
-import { useNavigate } from "react-router-dom";
+import { useGetUserID } from "../hooks/useGetUserID";
 
-export const Auth = () => {
+export const SavedRecipes = () => {
+  const [savedRecipes, setSavedRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const userID = useGetUserID();
+
+  useEffect(() => {
+    const fetchSavedRecipe = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/recipes/savedRecipes/ids/${userID}`
+        );
+
+        console.log("Response:", response.data); // Add this line to log the response data
+        setSavedRecipes(response.data.savedRecipes);
+        setLoading(false); // Set loading to false after data is fetched
+      } catch (err) {
+        console.error(err);
+        setLoading(false); // Set loading to false in case of error
+      }
+    };
+
+    fetchSavedRecipe();
+  }, [userID, savedRecipes]);
+
+  // Render loading indicator if data is still being fetched
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  // Render saved recipes list if data is available
   return (
-    <div className="auth">
-      <Login />
-      <Register />
+    <div>
+      <h1>Saved Recipes</h1>
+      <ul>
+        {savedRecipes.map((recipe) => (
+          <li key={recipe._id}>
+            <div>
+              <h2>{recipe.name}</h2>
+            </div>
+            <div className="instructions">
+              <p>{recipe.instructions}</p>
+            </div>
+            <img src={recipe.imageUrl} alt={recipe.name} />
+            <p>Cooking Time: {recipe.cookingTime} minutes</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [_, setCookies] = useCookies(["access_token"]);
-  const navigate = useNavigate();
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { useGetUserID } from "../hooks/useGetUserID";
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+// export const SavedRecipes = () => {
+//   const [savedRecipes, setSavedRecipes] = useState([]);
+//   const userID = useGetUserID();
 
-    try {
-      const result = await axios.post("http://localhost:3001/auth/login", {
-        username,
-        password,
-      });
+//   useEffect(() => {
+//     const fetchSavedRecipe = async () => {
+//       try {
+//         const response = await axios.get(
+//           `http://localhost:3001/recipes/savedRecipes/ids/${userID}`
+//         );
+//         setSavedRecipes(response.data.savedRecipes);
+//       } catch (err) {
+//         console.error(err);
+//       }
+//     };
 
-      setCookies("access_token", result.data.token);
-      window.localStorage.setItem("userID", result.data.userID);
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-    }
-  };
+//     fetchSavedRecipe();
+//   }, [userID]);
 
-  return (
-    <div className="auth-container">
-      <form onSubmit={handleSubmit}>
-        <h2>Login</h2>
-        <div className="form-group">
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-    </div>
-  );
-};
-
-const Register = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [_, setCookies] = useCookies(["access_token"]);
-  const navigate = useNavigate();
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    try {
-      await axios.post("http://localhost:3001/auth/register", {
-        username,
-        password,
-      });
-      alert("Registration Completed! Now login.");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  return (
-    <div className="auth-container">
-      <form onSubmit={handleSubmit}>
-        <h2>Register</h2>
-        <div className="form-group">
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </div>
-        <button type="submit">Register</button>
-      </form>
-    </div>
-  );
-};
+//   return (
+//     <div>
+//       <h1>Saved Recipes</h1>
+//       <ul>
+//         {savedRecipes.map((recipe) => (
+//           <li key={recipe._id}>
+//             <div>
+//               <h2>{recipe.name}</h2>
+//             </div>
+//             <div className="instructions">
+//               <p>{recipe.instructions}</p>
+//             </div>
+//             <img src={recipe.imageUrl} alt={recipe.name} />
+//             <p>Cooking Time: {recipe.cookingTime} minutes</p>
+//           </li>
+//         ))}
+//       </ul>
+//     </div>
+//   );
+// };
